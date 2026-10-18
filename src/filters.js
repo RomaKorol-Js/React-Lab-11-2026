@@ -7,8 +7,17 @@
  * @returns {Filters}
  */
 export function readFilters() {
-  // TODO C3
-  return {};
+  const form = document.querySelector('#filters');
+  if (!(form instanceof HTMLFormElement)) throw new TypeError('Не знайдено форму #filters');
+
+  const query = form.elements.namedItem('query');
+  const genre = form.elements.namedItem('genre');
+  const mine = form.elements.namedItem('mine');
+  if (!(query instanceof HTMLInputElement)) throw new TypeError('Не знайдено поле пошуку query');
+  if (!(genre instanceof HTMLSelectElement)) throw new TypeError('Не знайдено поле жанру genre');
+  if (!(mine instanceof HTMLInputElement)) throw new TypeError('Не знайдено перемикач mine');
+
+  return { query: query.value, genre: genre.value, mine: mine.checked };
 }
 
 /**
@@ -18,5 +27,20 @@ export function readFilters() {
  * @param {() => void} refresh перемальовує список для поточних фільтрів
  */
 export function initFilters(refresh) {
-  // TODO C3
+  const form = document.querySelector('#filters');
+  if (!(form instanceof HTMLFormElement)) throw new TypeError('Не знайдено форму #filters');
+
+  form.addEventListener('input', (event) => {
+    if (event.target instanceof HTMLInputElement && event.target.name === 'query') refresh();
+  });
+  form.addEventListener('change', (event) => {
+    if (
+      (event.target instanceof HTMLSelectElement && event.target.name === 'genre') ||
+      (event.target instanceof HTMLInputElement && event.target.name === 'mine')
+    ) {
+      refresh();
+    }
+  });
+  form.addEventListener('reset', () => queueMicrotask(refresh));
+  form.addEventListener('submit', (event) => event.preventDefault());
 }

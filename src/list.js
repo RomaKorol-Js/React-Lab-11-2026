@@ -28,12 +28,36 @@ export function initList(refresh) {
     if (!Number.isInteger(id)) throw new TypeError(`Некоректний id серіалу: ${card.dataset.id}`);
 
     if (button.dataset.action === 'toggle') {
+      const cards = [...results.querySelectorAll(':scope > li[data-id]')];
+      const index = cards.indexOf(card);
       toggle(id);
       count.textContent = String(watchlist.size);
       refresh();
-      results
-        .querySelector(`[data-id="${id}"] [data-action="toggle"]`)
-        ?.focus();
+      const updatedButton = results.querySelector(`[data-id="${id}"] [data-action="toggle"]`);
+      if (updatedButton) {
+        updatedButton.focus();
+        return;
+      }
+
+      const nextButton = cards
+        .slice(index + 1)
+        .map((item) => results.querySelector(`[data-id="${item.dataset.id}"] [data-action="toggle"]`))
+        .find((item) => item instanceof HTMLButtonElement);
+      const previousButton = cards
+        .slice(0, index)
+        .reverse()
+        .map((item) => results.querySelector(`[data-id="${item.dataset.id}"] [data-action="toggle"]`))
+        .find((item) => item instanceof HTMLButtonElement);
+      const heading = document.querySelector('#results-heading');
+
+      if (nextButton instanceof HTMLButtonElement) {
+        nextButton.focus();
+      } else if (previousButton instanceof HTMLButtonElement) {
+        previousButton.focus();
+      } else if (heading instanceof HTMLElement) {
+        heading.tabIndex = -1;
+        heading.focus();
+      }
     } else if (button.dataset.action === 'details') {
       openDetails(id);
     }
